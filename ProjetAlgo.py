@@ -1,54 +1,126 @@
+#Génération de polygone de test
+import math
+
+def generer_polygone(n, rayon=10):
+    """
+    Génère un polygone convexe à n sommets,
+    placés régulièrement sur un cercle.
+    """
+    sommets = []
+    for i in range(n):
+        angle = 2 * math.pi * i / n
+        x = rayon * math.cos(angle)
+        y = rayon * math.sin(angle)
+        sommets.append((x, y))
+    return sommets
 
 
-def validecorde(i,j):
-    if (i==j+1) or (i==j-1) or (i==j): #a verifier
+
+def distance(p1, p2):
+    return math.dist(p1, p2)
+
+def generer_vecteur_C(sommets):
+    """
+    Génère le vecteur C :
+    toutes les cordes possibles du polygone.
+    Chaque corde est (i, j, longueur).
+    """
+    n = len(sommets)
+    cordes = []
+
+    for i in range(n):
+        for j in range(i + 2, n):
+            # Exclure l'arête (0, n-1)
+            if i == 0 and j == n - 1:
+                continue
+            longueur = distance(sommets[i], sommets[j])
+            cordes.append((i, j, longueur))
+
+    return cordes
+
+
+
+
+n = 12
+sommets = generer_polygone(n)
+cordes = generer_vecteur_C(sommets)
+T = [[False]*n for _ in range(n)]
+
+def validecorde(i, j):
+    if i > j:
+        i, j = j, i
+    if i == j:
         return False
-    elif( T[i][j]==True):
+    if abs(i - j) == 1 or abs(i - j) == n-1:
         return False
-    for l in range(i,j):
-        for k in range(j+1,len(T[0])):  #on regarde les sommets entre j et la fin du tableau
-            if T[l][k]:
-                return False
-        for p in range(0,i):    #on regarde les sommets entre le début du tableau et i
-            if T[l][p]:
-                return False
+    if T[i][j]:
+        return False
+    for k in range(n):
+        for l in range(k+1, n):
+            if T[k][l]:
+                if k > l:
+                    k, l = l, k
+                if k in (i,j) or l in (i,j):
+                    continue
+                if i < k < j and j < l:
+                    return False
+                if k < i < l and l < j:
+                    return False
+
     return True
 
-def Question3(n):
-    E=[]
-    T=[][]
-    Triangul(T,n,E)
-    return E
+def triangulation_minimale(cordes, n):
+    meilleur_poids = float("inf")
+    meilleure_solution = []
+    def backtracking(i, solution, poids_courant):
+        nonlocal meilleur_poids, meilleure_solution
+        if len(solution) == n - 3:
+            meilleur_poids = poids_courant
+            meilleure_solution = solution.copy()
+            return
+        if i == len(cordes):
+            return
+        backtracking(i+1, solution, poids_courant)
+        (a, b, longueur) = cordes[i]
+        if validecorde(a, b):
+            T[a][b] = True
+            T[b][a] = True
+            solution.append(cordes[i])
+            backtracking(i+1,solution,poids_courant + longueur)
+            solution.pop()
+            T[a][b] = False
+            T[b][a] = False
+    backtracking(0, [], 0)
+    return meilleure_solution, meilleur_poids
+
+#O(2^n2⋅X n^2)
 
 
+#Version élagage
+def triangulation_minimale_opt(cordes, n):
+    meilleur_poids = float("inf")
+    meilleure_solution = []
+    def backtracking(i, solution, poids_courant):
+        nonlocal meilleur_poids, meilleure_solution
+        if len(solution) == n - 3:
+            meilleur_poids = poids_courant
+            meilleure_solution = solution.copy()
+            return
+        if i == len(cordes):
+            return
+        if poids_courant >= meilleur_poids:
+            return
+        backtracking(i+1, solution, poids_courant)
+        (a, b, longueur) = cordes[i]
+        if validecorde(a, b, T):
+            T[a][b] = True
+            T[b][a] = True
+            solution.append(cordes[i])
+            backtracking(i+1,solution,poids_courant + longueur)
+            solution.pop()
+            T[a][b] = False
+            T[b][a] = False
+    backtracking(0, [], 0)
+    return meilleure_solution, meilleur_poids
 
-def Triangul(Te,n,E):
-    T=Te
-    if n<3:  #cas de base
-        return T
-    for l in range(n):     #triangulation de la question2
-        for k in range(l+2,n):
-            if validecorde(l,k):
-                T[l][k]=True
-                T[k][l]=True
-        E.append(T)
-        T=[][]
-
-
-
-
-        #triangulation de la question3
-
-    for i in range(n/2):
-        for j in range(i):
-            T[l][k]=False
-    Triangul(T,i,E)
-
-
-
-
-
-
-
-
-
+print(triangulation_minimale(cordes,n))
