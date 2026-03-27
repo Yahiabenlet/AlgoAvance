@@ -129,6 +129,28 @@ print(triangulation_minimale_opt(cordes,n))
 
 
 
+def progDynamique(points):
+    n = len(points)
+    T = [[0]*n for _ in range(n)]
+
+    for longueur in range(3, n):
+        for i in range(n - longueur):
+            j = i + longueur - 1
+            T[i][j] = int("inf")
+
+            for k in range(i+1, j):
+                cout = 0
+                if k != i+1:
+                    cout += distance(points[i], points[k])
+                if k != j-1:
+                    cout += distance(points[k], points[j])
+
+                T[i][j] = min(T[i][j], T[i][k] + T[k][j] + cout)
+
+    return T[0][n-1]
+
+
+#O(n^3)
 
 
 def algoGlouton(sommets):
