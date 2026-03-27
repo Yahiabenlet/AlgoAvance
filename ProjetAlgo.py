@@ -124,3 +124,36 @@ def triangulation_minimale_opt(cordes, n):
     return meilleure_solution, meilleur_poids
 
 print(triangulation_minimale(cordes,n))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def algoGlouton(sommets):
+    solution = []
+    n = len(sommets)
+    m = int("inf")
+    c =0
+    while c < n-3:
+        for i in range(n):
+            for j in range(n):
+                if ((i==(j+2)%2)or(i==(j-2)%2)) and ((i,j,T[i][j]) not in solution):
+                    m = min(m,T[i][j])
+            solution.append((i,j,m))
+            c+=1
+    return solution
+
+
+                    
