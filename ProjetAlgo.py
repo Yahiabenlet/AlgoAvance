@@ -112,7 +112,7 @@ def triangulation_minimale_opt(cordes, n):
             return
         backtracking(i+1, solution, poids_courant)
         (a, b, longueur) = cordes[i]
-        if validecorde(a, b, T):
+        if validecorde(a, b):
             T[a][b] = True
             T[b][a] = True
             solution.append(cordes[i])
