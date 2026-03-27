@@ -1,18 +1,11 @@
 #Génération de polygone de test
 import math
 
-def generer_polygone(n, rayon=10):
+def generer_polygone(n):
     """
-    Génère un polygone convexe à n sommets,
-    placés régulièrement sur un cercle.
+    Génère un polygone convexe à n sommets.
     """
-    sommets = []
-    for i in range(n):
-        angle = 2 * math.pi * i / n
-        x = rayon * math.cos(angle)
-        y = rayon * math.sin(angle)
-        sommets.append((x, y))
-    return sommets
+    
 
 
 
@@ -41,7 +34,7 @@ def generer_vecteur_C(sommets):
 
 
 
-n = 13
+n = 8
 sommets = generer_polygone(n)
 cordes = generer_vecteur_C(sommets)
 T = [[False]*n for _ in range(n)]
@@ -136,7 +129,7 @@ def progDynamique(points):
     for longueur in range(3, n):
         for i in range(n - longueur):
             j = i + longueur - 1
-            T[i][j] = int("inf")
+            T[i][j] = float("inf")
 
             for k in range(i+1, j):
                 cout = 0
@@ -149,23 +142,30 @@ def progDynamique(points):
 
     return T[0][n-1]
 
-
+print(progDynamique(sommets))
 #O(n^3)
 
+print( "Essai 2 \n")
 
 def algoGlouton(sommets):
     solution = []
     n = len(sommets)
-    m = int("inf")
+    m = float("inf")
     c =0
+    for i in range(n):
+        for j in range(n):
+            T[i][j] = distance(sommets[i], sommets[j])
+
     while c < n-3:
         for i in range(n):
             for j in range(n):
-                if ((i==(j+2)%n)or(i==(j-2)%n)) and ((i,j,T[i][j]) not in solution):
+                if (i not in [(j-1)%n, j, (j+1)%n]) and ((i,j,T[i][j]) not in solution):
                     m = min(m,T[i][j])
-            solution.append((i,j,m))
+                    solution.append((i,j,m))
+    
             c+=1
     return solution
 
+print(algoGlouton(sommets))
 #O(n^4)
                     
