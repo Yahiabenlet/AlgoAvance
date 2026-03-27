@@ -41,7 +41,7 @@ def generer_vecteur_C(sommets):
 
 
 
-n = 12
+n = 13
 sommets = generer_polygone(n)
 cordes = generer_vecteur_C(sommets)
 T = [[False]*n for _ in range(n)]
