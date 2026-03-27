@@ -123,9 +123,9 @@ def triangulation_minimale_opt(cordes, n):
     backtracking(0, [], 0)
     return meilleure_solution, meilleur_poids
 
-print(triangulation_minimale(cordes,n))
+print(triangulation_minimale_opt(cordes,n))
 
-
+#O(2^n2⋅X n^2)
 
 
 
@@ -170,5 +170,5 @@ def algoGlouton(sommets):
             c+=1
     return solution
 
-
+#O(n^4)
                     
