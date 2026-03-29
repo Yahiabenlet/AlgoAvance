@@ -1,13 +1,26 @@
 #Génération de polygone de test
 import math
+import random
 
-def generer_polygone(n):
+def generer_polygone(n, rayon_min=50, rayon_max=150, seed=42):
     """
-    Génère un polygone convexe à n sommets.
+    Génère un polygone convexe irrégulier à n sommets 
+    Les angles sont aléatoires mais triés pour garantir la convexité.
     """
-    
+    random.seed(seed)
 
+    # Angles aléatoires répartis sur [0, 2π], triés en ordre décroissant (rétrograde)
+    angles = sorted([random.uniform(0, 2 * math.pi) for _ in range(n)], reverse=True)
 
+    # Rayon aléatoire pour chaque sommet → polygone irrégulier
+    sommets = []
+    for angle in angles:
+        rayon = random.uniform(rayon_min, rayon_max)
+        x = rayon * math.cos(angle)
+        y = rayon * math.sin(angle)
+        sommets.append((x, y))
+
+    return sommets
 
 def distance(p1, p2):
     return math.dist(p1, p2)
@@ -34,7 +47,7 @@ def generer_vecteur_C(sommets):
 
 
 
-n = 8
+n = 12
 sommets = generer_polygone(n)
 cordes = generer_vecteur_C(sommets)
 T = [[False]*n for _ in range(n)]
@@ -68,8 +81,9 @@ def triangulation_minimale(cordes, n):
     def backtracking(i, solution, poids_courant):
         nonlocal meilleur_poids, meilleure_solution
         if len(solution) == n - 3:
-            meilleur_poids = poids_courant
-            meilleure_solution = solution.copy()
+            if poids_courant < meilleur_poids :
+                meilleur_poids = poids_courant
+                meilleure_solution = solution.copy()
             return
         if i == len(cordes):
             return
@@ -96,8 +110,9 @@ def triangulation_minimale_opt(cordes, n):
     def backtracking(i, solution, poids_courant):
         nonlocal meilleur_poids, meilleure_solution
         if len(solution) == n - 3:
-            meilleur_poids = poids_courant
-            meilleure_solution = solution.copy()
+            if poids_courant < meilleur_poids :
+                meilleur_poids = poids_courant
+                meilleure_solution = solution.copy()
             return
         if i == len(cordes):
             return
@@ -126,8 +141,8 @@ def progDynamique(points):
     n = len(points)
     T = [[0]*n for _ in range(n)]
 
-    for longueur in range(3, n):
-        for i in range(n - longueur):
+    for longueur in range(3, n+1):
+        for i in range(n - longueur +1):
             j = i + longueur - 1
             T[i][j] = float("inf")
 
@@ -145,25 +160,32 @@ def progDynamique(points):
 print(progDynamique(sommets))
 #O(n^3)
 
-print( "Essai 2 \n")
+#print( "Essai 2 \n")
 
 def algoGlouton(sommets):
     solution = []
     n = len(sommets)
-    m = float("inf")
-    c =0
+    c = 0
+    C = [[0]*n for _ in range(n)]
     for i in range(n):
         for j in range(n):
-            T[i][j] = distance(sommets[i], sommets[j])
+            C[i][j] = distance(sommets[i], sommets[j])
 
     while c < n-3:
+        m = float("inf") 
+        meilleur = (-1, -1, -1)
         for i in range(n):
             for j in range(n):
-                if (i not in [(j-1)%n, j, (j+1)%n]) and ((i,j,T[i][j]) not in solution):
-                    m = min(m,T[i][j])
-                    solution.append((i,j,m))
-    
-            c+=1
+                if (i not in [(j-1)%n, j, (j+1)%n]) and ((i,j,C[i][j]) not in solution) and ((j,i,C[j][i]) not in solution):
+                    if C[i][j] < m and validecorde(i, j): 
+                        m = C[i][j]
+                        meilleur = (i, j, m)
+
+        a, b, _ = meilleur
+        T[a][b] = True
+        T[b][a] = True
+        c += 1
+        solution.append(meilleur)
     return solution
 
 print(algoGlouton(sommets))
